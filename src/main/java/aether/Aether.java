@@ -1,8 +1,8 @@
 package aether;
 
+import aether.ast.AST;
 import aether.lexer.Lexer;
 import aether.lexer.Token;
-import aether.ast.AST;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,10 +13,12 @@ import java.util.List;
 
 public class Aether {
     private static final Interpreter interpreter = new Interpreter();
+    // Define your custom language extension here
+    private static final String FILE_EXTENSION = ".aether";
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
         if (args.length > 1) {
-            System.out.println("Usage: java -cp target/classes aether.Aether [script]");
+            System.out.println("Usage: java -cp target/classes aether.Aether [script" + FILE_EXTENSION + "]");
             System.exit(64);
         } else if (args.length == 1) {
             runFile(args[0]);
@@ -26,6 +28,12 @@ public class Aether {
     }
 
     private static void runFile(String path) throws IOException {
+        // Enforce the custom file extension constraint
+        if (!path.endsWith(FILE_EXTENSION)) {
+            System.err.println("Error: Invalid file format. Aether source files must end with '" + FILE_EXTENSION + "'.");
+            System.exit(65); // EX_DATAERR: Input data was incorrect in some way
+        }
+
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes));
     }
