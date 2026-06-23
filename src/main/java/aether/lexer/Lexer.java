@@ -1,7 +1,4 @@
-package aether.utils;
-
-import aether.lexer.Token;
-import aether.lexer.TokenType;
+package aether.lexer;
 
 import java.util.ArrayList;
 import java.util.List;
