@@ -2,7 +2,6 @@ package aether.interpreter;
 
 import aether.ast.*;
 import aether.lexer.Token;
-import aether.lexer.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,9 @@ public class Interpreter implements AST.Visitor<Object> {
     @Override
     public Object visitFluxStmt(Flux stmt) {
         if (isTruthy(evaluate(stmt.condition()))) {
-            execute(stmt.thenBranch());
+            if (stmt.thenBranch() != null) {
+                execute(stmt.thenBranch());
+            }
         } else if (stmt.elseBranch() != null) {
             execute(stmt.elseBranch());
         }
@@ -80,7 +81,9 @@ public class Interpreter implements AST.Visitor<Object> {
     @Override
     public Object visitCycleStmt(Cycle stmt) {
         while (isTruthy(evaluate(stmt.condition()))) {
-            execute(stmt.body());
+            if (stmt.body() != null) {
+                execute(stmt.body());
+            }
         }
         return null;
     }
@@ -169,15 +172,11 @@ public class Interpreter implements AST.Visitor<Object> {
                 return (double) left - (double) right;
             }
             case PLUS -> {
-                // Java 25 pattern matching feature
                 if (left instanceof Double d1 && right instanceof Double d2) {
                     return d1 + d2;
                 }
                 if (left instanceof String s1 && right instanceof String s2) {
                     return s1 + s2;
-                }
-                if (left instanceof String || right instanceof String) {
-                    return stringify(left) + stringify(right);
                 }
                 throw new RuntimeException("Operands must be two numbers or two strings at line " + expr.operator().line() + ".");
             }
