@@ -4,3 +4,8 @@ reveal x + 5;
 manifest msg = "Hello from ";
 reveal msg + "Aether!";
 
+
+cycle (x>2) {
+    x = x-1;
+    reveal x;
+}
