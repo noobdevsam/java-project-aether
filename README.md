@@ -94,12 +94,12 @@ formal BNF grammar:
 * Java JDK 25
 * Apache Maven
 
-### 1. Compile the Source Code
+### 1. Package the Source Code
 
-Compile the Maven project:
+Package the Maven project:
 
 ```bash
-mvn clean compile
+mvn clean package
 ```
 
 ### 2. Run in Interactive REPL Mode
@@ -107,7 +107,7 @@ mvn clean compile
 Type code dynamically line-by-line:
 
 ```bash
-java -cp target/classes aether.Aether
+java -jar target/java-project-aether-1.0-SNAPSHOT.jar
 ```
 
 **Example Session:**
@@ -126,5 +126,5 @@ Execute a script file (e.g., creating a script file `test.aether`) [script files
 `scripts` folder inside the root directory of the project]:
 
 ```bash
-java -cp target/classes aether.Aether test.aether
+java -jar java-project-aether-1.0-SNAPSHOT.jar hello.aether
 ```
