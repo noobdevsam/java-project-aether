@@ -1,6 +1,4 @@
-package model;
-
-import enums.TokenType;
+package lexer;
 
 public record Token(TokenType type, String lexeme, Object literal, int line) {
 }

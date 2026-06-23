@@ -1,7 +1,7 @@
 package utils;
 
-import enums.TokenType;
-import model.Token;
+import lexer.Token;
+import lexer.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
