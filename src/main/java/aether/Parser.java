@@ -7,17 +7,38 @@ import aether.lexer.TokenType;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A recursive descent parser that parses a stream of Aether tokens
+ * into an Abstract Syntax Tree (AST) representing the program structure.
+ */
 public class Parser {
+
+    /**
+     * Special exception to unwind the parser stack upon encountering syntax errors.
+     */
     private static class ParseError extends RuntimeException {
     }
 
+    /** The list of scanned tokens to be parsed. */
     private final List<Token> tokens;
+
+    /** The index pointing to the current token being analyzed. */
     private int current = 0;
 
+    /**
+     * Constructs a Parser with the given token stream.
+     *
+     * @param tokens the list of tokens to parse
+     */
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
+    /**
+     * Starts parsing the token stream into a list of AST statement nodes.
+     *
+     * @return a list of statement nodes representing the parsed program
+     */
     public List<AST.Stmt> parse() {
         List<AST.Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
@@ -26,6 +47,12 @@ public class Parser {
         return statements;
     }
 
+    /**
+     * Parses a declaration (variable declaration or standard statement).
+     * Attempts syntax recovery if a ParseError occurs.
+     *
+     * @return the parsed statement node, or null if an error was caught and synchronized
+     */
     private AST.Stmt declaration() {
         try {
             if (match(TokenType.MANIFEST)) return varDeclaration();
@@ -36,6 +63,11 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a variable declaration: "manifest" IDENTIFIER ("=" expression)? ";"
+     *
+     * @return the VarDecl statement node
+     */
     private AST.Stmt varDeclaration() {
         Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
 
@@ -48,6 +80,11 @@ public class Parser {
         return new VarDecl(name, initializer);
     }
 
+    /**
+     * Parses a single statement (if, print, while, block, or expression statement).
+     *
+     * @return the statement node
+     */
     private AST.Stmt statement() {
         if (match(TokenType.FLUX)) return ifStatement();
         if (match(TokenType.REVEAL)) return printStatement();
@@ -57,6 +94,11 @@ public class Parser {
         return expressionStatement();
     }
 
+    /**
+     * Parses a block: "{" declaration* "}"
+     *
+     * @return a list of nested statements
+     */
     private List<AST.Stmt> block() {
         List<AST.Stmt> statements = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
@@ -67,6 +109,11 @@ public class Parser {
         return statements;
     }
 
+    /**
+     * Parses an if/conditional statement: "flux" "(" expression ")" statement ("else" statement)?
+     *
+     * @return the Flux statement node
+     */
     private AST.Stmt ifStatement() {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'flux'.");
         AST.Expr condition = expression();
@@ -81,12 +128,22 @@ public class Parser {
         return new Flux(condition, thenBranch, elseBranch);
     }
 
+    /**
+     * Parses a print statement: "reveal" expression ";"
+     *
+     * @return the Reveal statement node
+     */
     private AST.Stmt printStatement() {
         AST.Expr value = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Reveal(value);
     }
 
+    /**
+     * Parses a loop statement: "cycle" "(" expression ")" statement
+     *
+     * @return the Cycle statement node
+     */
     private AST.Stmt whileStatement() {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'cycle'.");
         AST.Expr condition = expression();
@@ -96,16 +153,31 @@ public class Parser {
         return new Cycle(condition, body);
     }
 
+    /**
+     * Parses an expression statement: expression ";"
+     *
+     * @return the ExpressionStmt node
+     */
     private AST.Stmt expressionStatement() {
         AST.Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new ExpressionStmt(expr);
     }
 
+    /**
+     * Parses an expression. In our hierarchy, starts at assignment.
+     *
+     * @return the expression node
+     */
     private AST.Expr expression() {
         return assignment();
     }
 
+    /**
+     * Parses an assignment: IDENTIFIER "=" assignment | equality
+     *
+     * @return the assignment or equality node
+     */
     private AST.Expr assignment() {
         AST.Expr expr = equality();
 
@@ -123,6 +195,11 @@ public class Parser {
         return expr;
     }
 
+    /**
+     * Parses equality comparisons: comparison (("!=" | "==") comparison)*
+     *
+     * @return the parsed expression
+     */
     private AST.Expr equality() {
         AST.Expr expr = comparison();
 
@@ -135,6 +212,11 @@ public class Parser {
         return expr;
     }
 
+    /**
+     * Parses comparisons: term ((">" | ">=" | "<" | "<=") term)*
+     *
+     * @return the parsed expression
+     */
     private AST.Expr comparison() {
         AST.Expr expr = term();
 
@@ -147,6 +229,11 @@ public class Parser {
         return expr;
     }
 
+    /**
+     * Parses terms: factor (("-" | "+") factor)*
+     *
+     * @return the parsed expression
+     */
     private AST.Expr term() {
         AST.Expr expr = factor();
 
@@ -159,6 +246,11 @@ public class Parser {
         return expr;
     }
 
+    /**
+     * Parses factors: unary (("/" | "*") unary)*
+     *
+     * @return the parsed expression
+     */
     private AST.Expr factor() {
         AST.Expr expr = unary();
 
@@ -171,6 +263,11 @@ public class Parser {
         return expr;
     }
 
+    /**
+     * Parses unary operators: ("!" | "-") unary | primary
+     *
+     * @return the parsed expression
+     */
     private AST.Expr unary() {
         if (match(TokenType.BANG, TokenType.MINUS)) {
             Token operator = previous();
@@ -181,6 +278,12 @@ public class Parser {
         return primary();
     }
 
+    /**
+     * Parses primary expressions (literals, variables, grouping, or array literals).
+     *
+     * @return the parsed primary expression node
+     * @throws ParseError if no matching expression can be parsed
+     */
     private AST.Expr primary() {
         if (match(TokenType.FALSE)) return new Literal(false);
         if (match(TokenType.TRUE)) return new Literal(true);
@@ -214,6 +317,13 @@ public class Parser {
         throw error(peek(), "Expect expression.");
     }
 
+    /**
+     * Checks if the current token matches any of the specified types.
+     * Consumes the token if it matches.
+     *
+     * @param types the token types to check against
+     * @return true if matches and consumed, false otherwise
+     */
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
             if (check(type)) {
@@ -224,38 +334,83 @@ public class Parser {
         return false;
     }
 
+    /**
+     * Consumes the current token if it matches the expected type; otherwise throws an error.
+     *
+     * @param type    the expected token type
+     * @param message the error message to display if not matched
+     * @return the consumed token
+     * @throws ParseError if not matched
+     */
     private Token consume(TokenType type, String message) {
         if (check(type)) return advance();
         throw error(peek(), message);
     }
 
+    /**
+     * Checks if the current token matches the given type without consuming it.
+     *
+     * @param type the token type to check
+     * @return true if the token type matches, false otherwise
+     */
     private boolean check(TokenType type) {
         if (isAtEnd()) return false;
         return peek().type() == type;
     }
 
+    /**
+     * Advances the pointer to the next token and returns the previous one.
+     *
+     * @return the previous token
+     */
     private Token advance() {
         if (!isAtEnd()) current++;
         return previous();
     }
 
+    /**
+     * Checks if the parser has consumed all tokens in the stream.
+     *
+     * @return true if EOF reached, false otherwise
+     */
     private boolean isAtEnd() {
         return peek().type() == TokenType.EOF;
     }
 
+    /**
+     * Looks at the current token without consuming it.
+     *
+     * @return the current token
+     */
     private Token peek() {
         return tokens.get(current);
     }
 
+    /**
+     * Returns the token just consumed.
+     *
+     * @return the previous token
+     */
     private Token previous() {
         return tokens.get(current - 1);
     }
 
+    /**
+     * Logs a syntax error message and returns a ParseError exception.
+     *
+     * @param token   the token at which the error occurred
+     * @param message the explanation of the error
+     * @return the ParseError exception to unwind stack
+     */
     private ParseError error(Token token, String message) {
         System.err.printf("[Line %d] Error at '%s': %s%n", token.line(), token.lexeme(), message);
         return new ParseError();
     }
 
+    /**
+     * Synchronizes parser state after a syntax error to restart parsing at
+     * the next declaration boundary. Prevents cascading parser error messages.
+     */
     private void synchronize() {
         advance();
 

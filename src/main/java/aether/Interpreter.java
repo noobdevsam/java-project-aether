@@ -6,9 +6,23 @@ import aether.lexer.Token;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Executes Aether programs by traversing the Abstract Syntax Tree (AST)
+ * utilizing the Visitor pattern. Resolves variables, evaluates expressions,
+ * and maintains environment scopes.
+ */
 public class Interpreter implements AST.Visitor<Object> {
+
+    /**
+     * The active execution scope holding variables and values.
+     */
     private Environment environment = new Environment();
 
+    /**
+     * Interprets a list of parsed statements, catching and logging runtime errors.
+     *
+     * @param statements the list of AST statements to execute
+     */
     public void interpret(List<AST.Stmt> statements) {
         try {
             for (AST.Stmt statement : statements) {
@@ -21,14 +35,32 @@ public class Interpreter implements AST.Visitor<Object> {
         }
     }
 
+    /**
+     * Helper method to execute a statement node.
+     *
+     * @param stmt the statement to execute
+     */
     private void execute(AST.Stmt stmt) {
         stmt.accept(this);
     }
 
+    /**
+     * Helper method to evaluate an expression node.
+     *
+     * @param expr the expression to evaluate
+     * @return the runtime value resulting from evaluation
+     */
     private Object evaluate(AST.Expr expr) {
         return expr.accept(this);
     }
 
+    /**
+     * Visits a variable declaration statement. Evaluates the initializer if present
+     * and registers the variable in the environment.
+     *
+     * @param stmt the variable declaration statement
+     * @return null
+     */
     @Override
     public Object visitVarDeclStmt(VarDecl stmt) {
         Object value = null;
@@ -40,18 +72,37 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Visits an expression statement. Evaluates the wrapped expression.
+     *
+     * @param stmt the expression statement
+     * @return null
+     */
     @Override
     public Object visitExpressionStmt(ExpressionStmt stmt) {
         evaluate(stmt.expression());
         return null;
     }
 
+    /**
+     * Visits a block statement. Creates a nested local scope and executes all inner statements.
+     *
+     * @param stmt the block statement
+     * @return null
+     */
     @Override
     public Object visitBlockStmt(Block stmt) {
         executeBlock(stmt.statements(), new Environment(environment));
         return null;
     }
 
+    /**
+     * Executes a list of statements in the context of a specific Environment scope.
+     * Guarantees restoration of the original environment upon completion.
+     *
+     * @param statements the statements inside the block
+     * @param env        the new local Environment scope
+     */
     public void executeBlock(List<AST.Stmt> statements, Environment env) {
         Environment previous = this.environment;
         try {
@@ -66,6 +117,12 @@ public class Interpreter implements AST.Visitor<Object> {
         }
     }
 
+    /**
+     * Visits an if (flux) statement. Evaluates the condition and branches execution accordingly.
+     *
+     * @param stmt the flux statement
+     * @return null
+     */
     @Override
     public Object visitFluxStmt(Flux stmt) {
         if (isTruthy(evaluate(stmt.condition()))) {
@@ -78,6 +135,12 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Visits a loop (cycle) statement. Executes the loop body repeatedly while the condition evaluates to truthy.
+     *
+     * @param stmt the cycle statement
+     * @return null
+     */
     @Override
     public Object visitCycleStmt(Cycle stmt) {
         while (isTruthy(evaluate(stmt.condition()))) {
@@ -88,6 +151,12 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Visits a reveal (print) statement. Outputs the stringified representation of the evaluated expression.
+     *
+     * @param stmt the reveal statement
+     * @return null
+     */
     @Override
     public Object visitRevealStmt(Reveal stmt) {
         Object value = evaluate(stmt.expression());
@@ -95,6 +164,12 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Visits an assignment expression. Evaluates the value and updates the variable in the environment.
+     *
+     * @param expr the assignment expression
+     * @return the assigned value
+     */
     @Override
     public Object visitAssignExpr(Assign expr) {
         Object value = evaluate(expr.value());
@@ -102,16 +177,34 @@ public class Interpreter implements AST.Visitor<Object> {
         return value;
     }
 
+    /**
+     * Visits a variable lookup expression. Retrieves its value from the environment.
+     *
+     * @param expr the variable lookup expression
+     * @return the value of the variable
+     */
     @Override
     public Object visitVariableExpr(Variable expr) {
         return environment.get(expr.name());
     }
 
+    /**
+     * Visits a literal expression. Returns the literal value directly.
+     *
+     * @param expr the literal expression
+     * @return the literal value
+     */
     @Override
     public Object visitLiteralExpr(Literal expr) {
         return expr.value();
     }
 
+    /**
+     * Visits an array literal expression. Evaluates all element expressions.
+     *
+     * @param expr the array literal expression
+     * @return a List containing evaluated element values
+     */
     @Override
     public Object visitArrayLiteralExpr(ArrayLiteral expr) {
         List<Object> elements = new ArrayList<>();
@@ -121,6 +214,12 @@ public class Interpreter implements AST.Visitor<Object> {
         return elements;
     }
 
+    /**
+     * Visits a unary expression (! or -). Evaluates the right operand and applies the operator.
+     *
+     * @param expr the unary expression
+     * @return the evaluated unary result
+     */
     @Override
     public Object visitUnaryExpr(Unary expr) {
         Object right = evaluate(expr.right());
@@ -140,6 +239,13 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Visits a binary expression (+, -, *, /, comparisons, equalities).
+     * Evaluates both operands and applies the operation.
+     *
+     * @param expr the binary expression
+     * @return the evaluated binary result
+     */
     @Override
     public Object visitBinaryExpr(Binary expr) {
         Object left = evaluate(expr.left());
@@ -200,28 +306,64 @@ public class Interpreter implements AST.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Checks if the evaluated value is truthy (non-null and not Boolean.FALSE).
+     *
+     * @param object the object to check
+     * @return true if truthy, false otherwise
+     */
     private boolean isTruthy(Object object) {
         if (object == null) return false;
         if (object instanceof Boolean b) return b;
         return true;
     }
 
+    /**
+     * Checks if two values are equal.
+     * Handles null values safely.
+     *
+     * @param a first operand
+     * @param b second operand
+     * @return true if equal, false otherwise
+     */
     private boolean isEqual(Object a, Object b) {
         if (a == null && b == null) return true;
         if (a == null) return false;
         return a.equals(b);
     }
 
+    /**
+     * Validates that the operand is a number.
+     *
+     * @param operator the unary operator token (for line reporting)
+     * @param operand  the operand to check
+     * @throws RuntimeException if operand is not a number
+     */
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) return;
         throw new RuntimeException("Operand must be a number at line " + operator.line() + ".");
     }
 
+    /**
+     * Validates that both operands are numbers.
+     *
+     * @param operator the binary operator token
+     * @param left     the left operand
+     * @param right    the right operand
+     * @throws RuntimeException if either operand is not a number
+     */
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
         throw new RuntimeException("Operands must be numbers at line " + operator.line() + ".");
     }
 
+    /**
+     * Converts a runtime object to its string representation for output.
+     * Truncates decimal parts (.0) for whole numbers.
+     *
+     * @param object the runtime value
+     * @return the stringified value
+     */
     private String stringify(Object object) {
         if (object == null) return "nil";
 
