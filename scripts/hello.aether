@@ -3,3 +3,4 @@ reveal x + 5;
 
 manifest msg = "Hello from ";
 reveal msg + "Aether!";
+
