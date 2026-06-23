@@ -1,0 +1,5 @@
+manifest x = 10;
+reveal x + 5;
+
+manifest msg = "Hello from ";
+reveal msg + "Aether!";
