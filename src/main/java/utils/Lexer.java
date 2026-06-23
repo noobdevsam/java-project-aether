@@ -52,13 +52,13 @@ public class Lexer {
             case '[' -> addToken(TokenType.LEFT_BRACKET);
             case ']' -> addToken(TokenType.RIGHT_BRACKET);
             case ',' -> addToken(TokenType.COMMA);
-            case '.' -> addToken(TokenType.DOT);
+//            case '.' -> addToken(TokenType.DOT);
             case '-' -> addToken(TokenType.MINUS);
             case '+' -> addToken(TokenType.PLUS);
             case ';' -> addToken(TokenType.SEMICOLON);
             case '*' -> addToken(TokenType.STAR);
             case '!' -> addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
-            case '=' -> addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+//            case '=' -> addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
             case '<' -> addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
             case '>' -> addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
             case '/', ' ' -> addToken(TokenType.SLASH); // Simplified for now
