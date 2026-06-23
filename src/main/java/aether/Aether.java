@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -34,7 +35,19 @@ public class Aether {
             System.exit(65); // EX_DATAERR: Input data was incorrect in some way
         }
 
-        byte[] bytes = Files.readAllBytes(Paths.get(path));
+        // 2. Define the base directory where your scripts are allowed
+        Path baseDir = Paths.get("scripts").toAbsolutePath().normalize();
+
+        // 3. Resolve the requested path against the base directory
+        Path targetPath = baseDir.resolve(path).normalize();
+
+        // 4. Vulnerability Check: Ensure the resolved path starts with the base directory
+        if (!targetPath.startsWith(baseDir)) {
+            throw new SecurityException("Access denied: File path outside of allowed directory.");
+        }
+
+        // 5. Proceed with execution
+        byte[] bytes = Files.readAllBytes(targetPath);
         run(new String(bytes));
     }
 
