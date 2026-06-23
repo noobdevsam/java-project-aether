@@ -1,16 +1,12 @@
 package aether;
 
-import aether.ast.AST;
 import aether.lexer.Lexer;
-import aether.lexer.Token;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class Aether {
     private static final Interpreter interpreter = new Interpreter();
@@ -36,10 +32,10 @@ public class Aether {
         }
 
         // 2. Define the base directory where your scripts are allowed
-        Path baseDir = Paths.get("scripts").toAbsolutePath().normalize();
+        var baseDir = Paths.get("scripts").toAbsolutePath().normalize();
 
         // 3. Resolve the requested path against the base directory
-        Path targetPath = baseDir.resolve(path).normalize();
+        var targetPath = baseDir.resolve(path).normalize();
 
         // 4. Vulnerability Check: Ensure the resolved path starts with the base directory
         if (!targetPath.startsWith(baseDir)) {
@@ -47,17 +43,17 @@ public class Aether {
         }
 
         // 5. Proceed with execution
-        byte[] bytes = Files.readAllBytes(targetPath);
+        var bytes = Files.readAllBytes(targetPath);
         run(new String(bytes));
     }
 
     private static void runPrompt() throws IOException {
-        InputStreamReader input = new InputStreamReader(System.in);
-        BufferedReader reader = new BufferedReader(input);
+        var input = new InputStreamReader(System.in);
+        var reader = new BufferedReader(input);
 
         for (;;) {
             System.out.print("aether> ");
-            String line = reader.readLine();
+            var line = reader.readLine();
             if (line == null) break;
             run(line);
         }
@@ -66,10 +62,10 @@ public class Aether {
     private static void run(String source) {
         if (source.trim().isEmpty()) return;
         try {
-            Lexer lexer = new Lexer(source);
-            List<Token> tokens = lexer.scanTokens();
-            Parser parser = new Parser(tokens);
-            List<AST.Stmt> statements = parser.parse();
+            var lexer = new Lexer(source);
+            var tokens = lexer.scanTokens();
+            var parser = new Parser(tokens);
+            var statements = parser.parse();
 
             if (statements == null || statements.contains(null)) {
                 return;
