@@ -1,6 +1,6 @@
-package ast;
+package aether.ast;
 
-import lexer.Token;
+import aether.lexer.Token;
 
 // equality, comparison, term, factor rules
 public record Binary(AST.Expr left, Token operator, AST.Expr right) implements AST.Expr {

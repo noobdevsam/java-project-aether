@@ -1,6 +1,6 @@
-package ast;
+package aether.ast;
 
-import lexer.Token;
+import aether.lexer.Token;
 
 // assignment -> IDENTIFIER "=" assignment | equality
 public record Assign(Token name, AST.Expr value) implements AST.Expr {

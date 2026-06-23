@@ -1,4 +1,4 @@
-package lexer;
+package aether.lexer;
 
 public enum TokenType {
     // Delimiters

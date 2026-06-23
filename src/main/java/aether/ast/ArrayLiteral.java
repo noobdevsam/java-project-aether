@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 public record ArrayLiteral() implements AST.Expr {
     @Override

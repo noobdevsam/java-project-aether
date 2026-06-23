@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 // exprStmt -> expression ";"
 public record ExpressionStmt(AST.Expr expression) implements AST.Stmt {

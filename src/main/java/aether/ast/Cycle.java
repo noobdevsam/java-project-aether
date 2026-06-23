@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 // whileStmt -> "cycle" "(" expression ")" statement
 public record Cycle(AST.Expr condition, AST.Stmt body) implements AST.Stmt {

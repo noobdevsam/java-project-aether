@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 // ifStmt -> "flux" "(" expression ")" statement ( "else" statement )?
 public record Flux(AST.Expr condition, AST.Stmt thenBranch, AST.Stmt elseBranch) implements AST.Stmt {

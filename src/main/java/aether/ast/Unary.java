@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 public record Unary() implements AST.Expr {
     @Override

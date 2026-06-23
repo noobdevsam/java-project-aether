@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 // printStmt -> "reveal" expression ";"
 public record Reveal(AST.Expr expression) implements AST.Stmt {

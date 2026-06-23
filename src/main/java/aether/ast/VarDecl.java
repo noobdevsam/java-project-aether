@@ -1,6 +1,6 @@
-package ast;
+package aether.ast;
 
-import lexer.Token;
+import aether.lexer.Token;
 
 // varDecl -> "manifest" IDENTIFIER ( "=" expression )? ";"
 public record VarDecl(Token name, AST.Expr initializer) implements AST.Stmt {

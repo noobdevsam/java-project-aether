@@ -1,4 +1,4 @@
-package ast;
+package aether.ast;
 
 public final class AST {
     private AST() {
