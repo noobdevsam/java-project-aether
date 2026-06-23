@@ -1,6 +1,7 @@
-package aether.interpreter;
+package aether;
 
 import aether.lexer.Token;
+
 import java.util.HashMap;
 import java.util.Map;
 

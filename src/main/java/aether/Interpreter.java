@@ -1,4 +1,4 @@
-package aether.interpreter;
+package aether;
 
 import aether.ast.*;
 import aether.lexer.Token;
@@ -133,7 +133,8 @@ public class Interpreter implements AST.Visitor<Object> {
                 checkNumberOperand(expr.operator(), right);
                 return -(double) right;
             }
-            default -> {}
+            default -> {
+            }
         }
 
         return null;
@@ -192,7 +193,8 @@ public class Interpreter implements AST.Visitor<Object> {
                 checkNumberOperands(expr.operator(), left, right);
                 return (double) left * (double) right;
             }
-            default -> {}
+            default -> {
+            }
         }
 
         return null;

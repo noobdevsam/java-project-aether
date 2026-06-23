@@ -1,4 +1,4 @@
-package aether.parser;
+package aether;
 
 import aether.ast.*;
 import aether.lexer.Token;
@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
-    private static class ParseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {
+    }
 
     private final List<Token> tokens;
     private int current = 0;
@@ -112,9 +113,7 @@ public class Parser {
             Token equals = previous();
             AST.Expr value = assignment();
 
-            // Using modern Java pattern matching for instanceof
-            if (expr instanceof Variable varExpr) {
-                Token name = varExpr.name();
+            if (expr instanceof Variable(Token name)) {
                 return new Assign(name, value);
             }
 
@@ -263,7 +262,6 @@ public class Parser {
         while (!isAtEnd()) {
             if (previous().type() == TokenType.SEMICOLON) return;
 
-            // Pattern Matching for Switch in Java 21+ / Java 25
             switch (peek().type()) {
                 case FLUX, CYCLE, REVEAL, MANIFEST -> {
                     return;
